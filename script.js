@@ -10,19 +10,22 @@
   const targetLabel = document.getElementById("morph-target");
   const progressBar = document.getElementById("morph-progress");
 
-  const N = 620;               // particle count
   const HELIX_HEIGHT = 560;
-  const HELIX_RADIUS = 120;
-  const HELIX_TURNS = 2.6;
+  const HELIX_RADIUS = 132;
+  const HELIX_TURNS = 2.0;
   const CUBE_SIZE = 300;
   const FOV = 950;
 
-  // Rubik's face colors (right, left, top, bottom, front, back)
-  // Saturated versions that read well on a white background;
-  // the "white" face becomes a cool gray so it stays visible.
-  const FACE_COLORS = ["#d93025", "#e8710a", "#9aa0a6", "#f9ab00", "#188038", "#1a73e8"];
-  // Nucleotide-inspired rung colors (A/T/G/C)
-  const BASE_COLORS = ["#188038", "#d93025", "#f9ab00", "#1a73e8"];
+  // Authentic Rubik's face colors (right, left, top, bottom, front, back);
+  // the white face becomes a cool gray so it stays visible on white.
+  const FACE_COLORS = ["#b71234", "#ff5800", "#c3cad3", "#ffd500", "#009b48", "#0046ad"];
+  // Watson-Crick base pairs: A (green) - T (red), G (amber) - C (blue)
+  const BASE_PAIRS = [
+    ["#34a853", "#ea4335"], // A-T
+    ["#ea4335", "#34a853"], // T-A
+    ["#fbbc04", "#4285f4"], // G-C
+    ["#4285f4", "#fbbc04"], // C-G
+  ];
   const STRAND_A = "#1a73e8";
   const STRAND_B = "#12b5cb";
 
@@ -35,9 +38,13 @@
   }
 
   /* ---------- build DNA targets ---------- */
+  // Two smooth backbone strands + discrete base-pair rungs, each rung a
+  // short bar of particles split into its two complementary base colors.
   const particles = [];
-  const nStrand = Math.floor(N * 0.36);
-  const nRungs = N - nStrand * 2;
+  const nStrand = 160;
+  const NUM_RUNGS = 22;
+  const RUNG_PARTICLES = 8;
+  const rungRanges = []; // particle index ranges, used to draw rung lines
 
   for (let s = 0; s < 2; s++) {
     for (let i = 0; i < nStrand; i++) {
@@ -50,26 +57,34 @@
           z: Math.sin(theta) * HELIX_RADIUS,
         },
         dnaColor: hexToRgb(s === 0 ? STRAND_A : STRAND_B),
-        size: 2.6,
+        size: 3.0,
       });
     }
   }
 
-  for (let i = 0; i < nRungs; i++) {
-    const f = (i % 26) / 26 + (Math.floor(i / 26) * 0.011);
-    const theta = (f % 1) * HELIX_TURNS * Math.PI * 2;
+  for (let k = 0; k < NUM_RUNGS; k++) {
+    const f = (k + 0.5) / NUM_RUNGS;
+    const theta = f * HELIX_TURNS * Math.PI * 2;
     const ax = Math.cos(theta) * HELIX_RADIUS;
     const az = Math.sin(theta) * HELIX_RADIUS;
-    const t = 0.14 + 0.72 * ((i * 7919) % 100) / 100; // deterministic spread along the rung
-    particles.push({
-      dna: {
-        x: lerp(ax, -ax, t),
-        y: ((f % 1) - 0.5) * HELIX_HEIGHT,
-        z: lerp(az, -az, t),
-      },
-      dnaColor: hexToRgb(BASE_COLORS[i % 4]),
-      size: 2.1,
-    });
+    const y = (f - 0.5) * HELIX_HEIGHT;
+    const pair = BASE_PAIRS[((k * 2654435761) >>> 0) % 4];
+    const start = particles.length;
+
+    // invisible anchor on strand A so the rung line meets the backbone
+    particles.push({ dna: { x: ax, y, z: az }, dnaColor: hexToRgb(pair[0]), size: 0 });
+    for (let j = 0; j < RUNG_PARTICLES; j++) {
+      // two groups of four with a small gap at the pair junction
+      const t = j < 4 ? 0.10 + j * 0.12 : 0.54 + (j - 4) * 0.12;
+      particles.push({
+        dna: { x: lerp(ax, -ax, t), y, z: lerp(az, -az, t) },
+        dnaColor: hexToRgb(j < 4 ? pair[0] : pair[1]),
+        size: 2.6,
+      });
+    }
+    // invisible anchor on strand B
+    particles.push({ dna: { x: -ax, y, z: -az }, dnaColor: hexToRgb(pair[1]), size: 0 });
+    rungRanges.push({ start, count: RUNG_PARTICLES + 2 });
   }
 
   /* ---------- build Rubik's cube targets ---------- */
@@ -216,7 +231,7 @@
     // slow spin of the DNA around its own axis so the helix visibly rotates
     const dnaSpin = now * 0.0006;
 
-    const drawList = [];
+    const proj = new Array(particles.length);
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
 
@@ -237,24 +252,61 @@
       const sx = centerX + x * scale;
       const sy = centerY + y * scale;
 
-      const r = lerp(p.dnaColor[0], p.cubeColor[0], morph);
-      const g = lerp(p.dnaColor[1], p.cubeColor[1], morph);
-      const b = lerp(p.dnaColor[2], p.cubeColor[2], morph);
+      const r = lerp(p.dnaColor[0], p.cubeColor[0], morph) | 0;
+      const g = lerp(p.dnaColor[1], p.cubeColor[1], morph) | 0;
+      const b = lerp(p.dnaColor[2], p.cubeColor[2], morph) | 0;
 
-      drawList.push({ sx, sy, z, scale, r, g, b, size: p.size });
+      proj[i] = { sx, sy, z, scale, r, g, b, size: p.size };
+    }
+
+    // connector lines make the helix read as DNA; they fade out as it
+    // morphs into the cube
+    const lineAlpha = Math.pow(1 - morph, 2);
+    if (lineAlpha > 0.02) {
+      ctx.lineCap = "round";
+
+      // backbone strands
+      for (let s = 0; s < 2; s++) {
+        for (let i = s * nStrand; i < s * nStrand + nStrand - 1; i++) {
+          const a = proj[i], b2 = proj[i + 1];
+          const sc = (a.scale + b2.scale) / 2;
+          const alpha = lineAlpha * Math.min(Math.max(0.75 * sc - 0.2, 0.12), 0.6);
+          ctx.strokeStyle = `rgba(${a.r},${a.g},${a.b},${alpha})`;
+          ctx.lineWidth = 2.4 * sc;
+          ctx.beginPath();
+          ctx.moveTo(a.sx, a.sy);
+          ctx.lineTo(b2.sx, b2.sy);
+          ctx.stroke();
+        }
+      }
+
+      // base-pair rungs (anchor -> bar particles -> anchor)
+      for (const range of rungRanges) {
+        for (let i = range.start; i < range.start + range.count - 1; i++) {
+          const a = proj[i], b2 = proj[i + 1];
+          const sc = (a.scale + b2.scale) / 2;
+          const alpha = lineAlpha * Math.min(Math.max(0.65 * sc - 0.18, 0.1), 0.5);
+          ctx.strokeStyle = `rgba(${b2.r},${b2.g},${b2.b},${alpha})`;
+          ctx.lineWidth = 1.8 * sc;
+          ctx.beginPath();
+          ctx.moveTo(a.sx, a.sy);
+          ctx.lineTo(b2.sx, b2.sy);
+          ctx.stroke();
+        }
+      }
     }
 
     // painter's order: far particles first, dimmer
-    drawList.sort((a, b) => b.z - a.z);
+    const drawList = proj.filter((d) => d.size > 0).sort((a, b) => b.z - a.z);
     for (const d of drawList) {
       const alpha = Math.min(Math.max(0.35 + d.scale * 0.6, 0.22), 1);
       const rad = d.size * d.scale;
       // subtle soft halo behind each particle
-      ctx.fillStyle = `rgba(${d.r | 0},${d.g | 0},${d.b | 0},${alpha * 0.1})`;
+      ctx.fillStyle = `rgba(${d.r},${d.g},${d.b},${alpha * 0.1})`;
       ctx.beginPath();
       ctx.arc(d.sx, d.sy, rad * 2.6, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = `rgba(${d.r | 0},${d.g | 0},${d.b | 0},${alpha})`;
+      ctx.fillStyle = `rgba(${d.r},${d.g},${d.b},${alpha})`;
       ctx.beginPath();
       ctx.arc(d.sx, d.sy, rad, 0, Math.PI * 2);
       ctx.fill();

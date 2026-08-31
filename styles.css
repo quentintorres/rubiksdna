@@ -69,17 +69,11 @@ h1, h2, h3 { font-family: var(--font-display); }
 }
 
 .nav__logo-mark {
-  display: grid;
-  grid-template-columns: repeat(2, 9px);
-  gap: 2px;
-  transition: transform 0.5s cubic-bezier(0.6, 0, 0.2, 1.4);
+  display: block;
+  flex-shrink: 0;
+  transition: transform 0.6s cubic-bezier(0.6, 0, 0.2, 1.4);
 }
-.nav__logo:hover .nav__logo-mark { transform: rotate(90deg); }
-.nav__logo-mark i { width: 9px; height: 9px; border-radius: 2px; }
-.nav__logo-mark i:nth-child(1) { background: var(--green); }
-.nav__logo-mark i:nth-child(2) { background: var(--blue); }
-.nav__logo-mark i:nth-child(3) { background: var(--amber); }
-.nav__logo-mark i:nth-child(4) { background: var(--red); }
+.nav__logo:hover .nav__logo-mark { transform: rotate(180deg); }
 
 .nav__links { display: flex; gap: 2.2rem; }
 .nav__links a {
