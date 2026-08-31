@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rubiks DNA — Solving the Combinatorial Puzzle of Aging</title>
+  <meta name="description" content="Rubiks DNA is a longevity research lab decoding the combinatorial logic of the epigenome to reverse cellular aging." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='10' width='36' height='36' rx='6' fill='%2300e5a0'/><rect x='54' y='10' width='36' height='36' rx='6' fill='%236c5ce7'/><rect x='10' y='54' width='36' height='36' rx='6' fill='%23ffb020'/><rect x='54' y='54' width='36' height='36' rx='6' fill='%23ff5470'/></svg>" />
+</head>
+<body>
+
+  <header class="nav" id="top">
+    <a class="nav__logo" href="#top">
+      <span class="nav__logo-mark" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+      </span>
+      RUBIKS<span class="accent">DNA</span>
+    </a>
+    <nav class="nav__links">
+      <a href="#research">Research</a>
+      <a href="#platform">Platform</a>
+      <a href="#publications">Publications</a>
+      <a href="#team">Team</a>
+    </nav>
+    <a class="btn btn--ghost nav__cta" href="#contact">Partner with us</a>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <canvas id="morph-canvas" aria-hidden="true"></canvas>
+    <div class="hero__grid" aria-hidden="true"></div>
+
+    <div class="hero__content">
+      <p class="eyebrow"><span class="pulse-dot"></span> Longevity Research Lab · Est. 2024</p>
+      <h1>
+        Aging is a puzzle with
+        <span class="gradient-text">4.3&times;10<sup>19</sup></span>
+        states.<br />We're finding the
+        <span class="gradient-text">solve.</span>
+      </h1>
+      <p class="hero__sub">
+        Rubiks DNA maps the combinatorial logic of the epigenome — treating every
+        methylation pattern as a face of the cube, and cellular rejuvenation as
+        the algorithm that returns it to a solved, youthful state.
+      </p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="#research">Explore our research</a>
+        <a class="btn btn--ghost" href="#publications">Read the science</a>
+      </div>
+      <p class="hero__morph-label mono">
+        <span id="morph-state">HELIX</span>
+        <span class="morph-bar"><span id="morph-progress"></span></span>
+        <span id="morph-target">CUBE</span>
+      </p>
+    </div>
+
+    <div class="hero__scroll mono" aria-hidden="true">SCROLL ↓</div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="stat">
+      <span class="stat__num" data-count="27">0</span>
+      <span class="stat__label">Epigenetic loci reprogrammed</span>
+    </div>
+    <div class="stat">
+      <span class="stat__num" data-count="14" data-suffix=" yrs">0</span>
+      <span class="stat__label">Median biological age reversal (murine)</span>
+    </div>
+    <div class="stat">
+      <span class="stat__num" data-count="120" data-suffix="M+">0</span>
+      <span class="stat__label">Methylation states modeled daily</span>
+    </div>
+    <div class="stat">
+      <span class="stat__num" data-count="9">0</span>
+      <span class="stat__label">Peer-reviewed publications</span>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section class="section" id="research">
+    <div class="section__head">
+      <p class="eyebrow">01 / Research Programs</p>
+      <h2>Every rotation is a <span class="gradient-text">reversible move.</span></h2>
+      <p class="section__sub">
+        We treat the aging epigenome as a scrambled cube: high-dimensional, but governed
+        by a finite set of reversible operations. Our four programs each attack one face.
+      </p>
+    </div>
+
+    <div class="cards">
+      <article class="card">
+        <div class="card__icon" style="--c:#188038">◩</div>
+        <h3>Epigenetic Reprogramming</h3>
+        <p>Partial reprogramming with transient OSK expression to reset methylation clocks without erasing cell identity.</p>
+        <span class="card__tag mono">PROGRAM RX-01</span>
+      </article>
+      <article class="card">
+        <div class="card__icon" style="--c:#a142f4">◪</div>
+        <h3>Senolytic Discovery</h3>
+        <p>Machine-guided screens that identify compounds clearing senescent cells while sparing healthy tissue.</p>
+        <span class="card__tag mono">PROGRAM SN-02</span>
+      </article>
+      <article class="card">
+        <div class="card__icon" style="--c:#f9ab00">◨</div>
+        <h3>Genomic Stability</h3>
+        <p>Engineering enhanced DNA damage response pathways to slow the accumulation of somatic mutations.</p>
+        <span class="card__tag mono">PROGRAM GS-03</span>
+      </article>
+      <article class="card">
+        <div class="card__icon" style="--c:#d93025">◧</div>
+        <h3>Combinatorial Clocks</h3>
+        <p>Next-generation aging biomarkers built on group theory — measuring distance-to-solved, not just elapsed time.</p>
+        <span class="card__tag mono">PROGRAM CC-04</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- PLATFORM -->
+  <section class="section section--alt" id="platform">
+    <div class="platform">
+      <div class="platform__text">
+        <p class="eyebrow">02 / The Platform</p>
+        <h2>CUBESOLVER<span class="accent">™</span></h2>
+        <p class="section__sub">
+          Our computational engine searches the space of epigenetic interventions the way
+          a speedcuber searches move sequences — pruning trillions of paths to find the
+          shortest route back to youth.
+        </p>
+        <ul class="platform__list">
+          <li><span class="mono accent">SCAN</span> Single-cell multi-omic profiling captures the scrambled state.</li>
+          <li><span class="mono accent">SOLVE</span> Graph search over intervention space finds minimal reprogramming sequences.</li>
+          <li><span class="mono accent">ROTATE</span> Targeted delivery executes the moves — in vitro, then in vivo.</li>
+          <li><span class="mono accent">VERIFY</span> Combinatorial clocks confirm distance-to-solved has decreased.</li>
+        </ul>
+      </div>
+      <div class="platform__visual" aria-hidden="true">
+        <div class="terminal mono">
+          <div class="terminal__bar"><i></i><i></i><i></i> cubesolver v3.2</div>
+          <pre id="terminal-text"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PUBLICATIONS -->
+  <section class="section" id="publications">
+    <div class="section__head">
+      <p class="eyebrow">03 / Selected Publications</p>
+      <h2>Peer-reviewed <span class="gradient-text">moves.</span></h2>
+    </div>
+    <div class="pubs">
+      <a class="pub" href="#">
+        <span class="pub__journal mono">Nature Aging · 2026</span>
+        <h3>Group-theoretic embedding of CpG methylation states predicts rejuvenation trajectories</h3>
+        <span class="pub__authors">Okafor T., Lindqvist S., Ramanathan P., et al.</span>
+        <span class="pub__arrow">→</span>
+      </a>
+      <a class="pub" href="#">
+        <span class="pub__journal mono">Cell · 2025</span>
+        <h3>Minimal transcription-factor sequences for partial reprogramming without pluripotency risk</h3>
+        <span class="pub__authors">Lindqvist S., Torres Q., Chen W., et al.</span>
+        <span class="pub__arrow">→</span>
+      </a>
+      <a class="pub" href="#">
+        <span class="pub__journal mono">Science Translational Medicine · 2025</span>
+        <h3>A distance-to-solved biomarker outperforms chronological clocks across 12 tissues</h3>
+        <span class="pub__authors">Ramanathan P., Adeyemi K., et al.</span>
+        <span class="pub__arrow">→</span>
+      </a>
+      <a class="pub" href="#">
+        <span class="pub__journal mono">eLife · 2024</span>
+        <h3>Senolytic candidate RD-117 restores tissue function in aged murine models</h3>
+        <span class="pub__authors">Chen W., Okafor T., et al.</span>
+        <span class="pub__arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="section section--alt" id="team">
+    <div class="section__head">
+      <p class="eyebrow">04 / The Solvers</p>
+      <h2>Built by people who <span class="gradient-text">hate unsolved states.</span></h2>
+    </div>
+    <div class="team">
+      <div class="member">
+        <div class="member__avatar" style="--c:#188038">TO</div>
+        <h3>Dr. Tunde Okafor</h3>
+        <p class="mono">Co-founder · Epigenetics</p>
+        <span>Formerly Broad Institute. 40+ papers on chromatin dynamics.</span>
+      </div>
+      <div class="member">
+        <div class="member__avatar" style="--c:#a142f4">SL</div>
+        <h3>Dr. Sara Lindqvist</h3>
+        <p class="mono">Co-founder · Reprogramming</p>
+        <span>Pioneer of transient OSK delivery. Karolinska Institute.</span>
+      </div>
+      <div class="member">
+        <div class="member__avatar" style="--c:#f9ab00">PR</div>
+        <h3>Dr. Priya Ramanathan</h3>
+        <p class="mono">Head of Computation</p>
+        <span>Ex-DeepMind. Sub-20 second 3×3 solver, naturally.</span>
+      </div>
+      <div class="member">
+        <div class="member__avatar" style="--c:#d93025">WC</div>
+        <h3>Dr. Wei Chen</h3>
+        <p class="mono">Head of Therapeutics</p>
+        <span>Led two senolytics into Phase I. UCSF School of Medicine.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA / CONTACT -->
+  <section class="section cta" id="contact">
+    <h2>The cube is scrambled.<br /><span class="gradient-text">Help us solve it.</span></h2>
+    <p class="section__sub">We collaborate with academic labs, pharma partners, and mission-aligned investors.</p>
+    <a class="btn btn--primary btn--lg" href="mailto:hello@rubiksdna.bio">hello@rubiksdna.bio</a>
+  </section>
+
+  <footer class="footer">
+    <span>© 2026 Rubiks DNA, Inc. — Cambridge, MA</span>
+    <span class="mono">R U R' U' — repeat until young.</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
