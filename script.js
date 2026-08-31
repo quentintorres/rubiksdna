@@ -1,5 +1,5 @@
 /* ============================================================
-   RUBIKS DNA — hero morph: DNA double helix <-> Rubik's cube
+   RUBIKS DNA — hero morph: DNA helix -> Rubik's cube -> healthy human
    Zero dependencies. 3D particles projected onto a 2D canvas.
    ============================================================ */
 
@@ -116,19 +116,114 @@
     p.twist = null; // populated during layer twists
   });
 
+  /* ---------- build human targets ---------- */
+  // The third form: a healthy human figure (face, long hair, waving arm,
+  // legs) — the mission: DNA -> solved puzzle -> grown, healthy person.
+  const HUMAN_COLORS = {
+    hair: "#f9ab00",
+    face: "#1a73e8",
+    body: "#34a853",
+    legs: "#12b5cb",
+  };
+  const humanPoints = [];
+
+  function addPolyline(pts, count, color, jitter = 3) {
+    const segs = [];
+    let total = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const L = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+      segs.push(L);
+      total += L;
+    }
+    for (let k = 0; k < count; k++) {
+      let d = ((k + 0.5) / count) * total;
+      let i = 0;
+      while (d > segs[i] && i < segs.length - 1) { d -= segs[i]; i++; }
+      const t = segs[i] ? d / segs[i] : 0;
+      humanPoints.push({
+        x: lerp(pts[i][0], pts[i + 1][0], t) + (Math.random() - 0.5) * jitter,
+        y: lerp(pts[i][1], pts[i + 1][1], t) + (Math.random() - 0.5) * jitter,
+        z: (Math.random() - 0.5) * 14,
+        color: hexToRgb(color),
+      });
+    }
+  }
+
+  function addBezier(p0, p1, p2, count, color, jitter = 5) {
+    for (let k = 0; k < count; k++) {
+      const t = (k + 0.5) / count;
+      const a = (1 - t) * (1 - t), b = 2 * (1 - t) * t, c = t * t;
+      humanPoints.push({
+        x: a * p0[0] + b * p1[0] + c * p2[0] + (Math.random() - 0.5) * jitter,
+        y: a * p0[1] + b * p1[1] + c * p2[1] + (Math.random() - 0.5) * jitter,
+        z: (Math.random() - 0.5) * 16,
+        color: hexToRgb(color),
+      });
+    }
+  }
+
+  function addCircle(cx0, cy0, r, count, color) {
+    for (let k = 0; k < count; k++) {
+      const a = (k / count) * Math.PI * 2;
+      humanPoints.push({
+        x: cx0 + Math.cos(a) * r,
+        y: cy0 + Math.sin(a) * r,
+        z: (Math.random() - 0.5) * 10,
+        color: hexToRgb(color),
+      });
+    }
+  }
+
+  // head + face (y is negative upward in model space)
+  addCircle(0, -185, 34, 56, HUMAN_COLORS.face);
+  addCircle(-12, -192, 3, 6, HUMAN_COLORS.face);                 // left eye
+  addCircle(12, -192, 3, 6, HUMAN_COLORS.face);                  // right eye
+  addPolyline([[-14, -172], [-7, -167], [0, -165], [7, -167], [14, -172]], 16, HUMAN_COLORS.face, 1.5); // smile
+  // long hair: flowing strands down both sides
+  for (let s = 0; s < 4; s++) {
+    addBezier([-4 - s * 3, -219 + s], [-42 - s * 8, -150 - s * 6], [-32 - s * 9, -40 + s * 14], 22, HUMAN_COLORS.hair);
+    addBezier([4 + s * 3, -219 + s], [42 + s * 8, -150 - s * 6], [32 + s * 9, -40 + s * 14], 22, HUMAN_COLORS.hair);
+  }
+  // torso
+  addPolyline([[0, -151], [0, -135]], 10, HUMAN_COLORS.body);    // neck
+  addPolyline([[-50, -128], [50, -128]], 22, HUMAN_COLORS.body); // shoulders
+  addPolyline([[0, -128], [0, -12]], 26, HUMAN_COLORS.body);     // spine
+  addPolyline([[-50, -128], [-32, -12]], 22, HUMAN_COLORS.body);
+  addPolyline([[50, -128], [32, -12]], 22, HUMAN_COLORS.body);
+  addPolyline([[-32, -12], [32, -12]], 14, HUMAN_COLORS.body);   // hips
+  // arms: left relaxed, right raised and waving
+  addPolyline([[-50, -128], [-82, -62], [-88, 8]], 36, HUMAN_COLORS.body);
+  addPolyline([[50, -128], [88, -180], [98, -235]], 36, HUMAN_COLORS.body);
+  addCircle(-88, 14, 7, 8, HUMAN_COLORS.body);                   // left hand
+  addCircle(100, -242, 7, 8, HUMAN_COLORS.body);                 // right hand
+  // legs + feet
+  addPolyline([[-18, -12], [-28, 115], [-32, 235]], 42, HUMAN_COLORS.legs);
+  addPolyline([[18, -12], [28, 115], [32, 235]], 42, HUMAN_COLORS.legs);
+  addPolyline([[-32, 235], [-52, 240]], 8, HUMAN_COLORS.legs);
+  addPolyline([[32, 235], [52, 240]], 8, HUMAN_COLORS.legs);
+
+  particles.forEach((p, idx) => {
+    const hp = humanPoints[idx % humanPoints.length];
+    p.human = { x: hp.x, y: hp.y, z: hp.z };
+    p.humanColor = hp.color;
+  });
+
   /* ---------- morph state machine ---------- */
-  // phases: holdDna -> toCube -> holdCube (with layer twist) -> toDna
+  // cycle: helix -> cube (with layer twist) -> human -> helix
   const PHASES = [
-    { name: "holdDna", dur: 3800 },
-    { name: "toCube", dur: 2600 },
-    { name: "holdCube", dur: 4600 },
-    { name: "toDna", dur: 2600 },
+    { name: "holdDna", from: "dna", to: "cube", dur: 3600, transition: false },
+    { name: "toCube", from: "dna", to: "cube", dur: 2600, transition: true },
+    { name: "holdCube", from: "cube", to: "human", dur: 4600, transition: false },
+    { name: "toHuman", from: "cube", to: "human", dur: 2600, transition: true },
+    { name: "holdHuman", from: "human", to: "dna", dur: 4200, transition: false },
+    { name: "toDna", from: "human", to: "dna", dur: 2600, transition: true },
   ];
+  const SHAPE_LABEL = { dna: "HELIX", cube: "CUBE", human: "HUMAN" };
   let phaseIndex = 0;
   let phaseStart = performance.now();
   let currentMove = null;
 
-  // ?state=dna / ?state=cube pins the morph (used for testing/screenshots)
+  // ?state=dna / ?state=cube / ?state=human pins the morph (testing/screenshots)
   const forcedState = new URLSearchParams(location.search).get("state");
 
   function rotatePoint(p, axis, angle) {
@@ -190,16 +285,14 @@
 
     const pt = elapsed / phase.dur;
 
-    // morph: 0 = DNA, 1 = cube
-    let morph;
-    switch (phase.name) {
-      case "holdDna": morph = 0; break;
-      case "toCube": morph = easeInOut(pt); break;
-      case "holdCube": morph = 1; break;
-      default: morph = 1 - easeInOut(pt);
+    // blend between the phase's two shapes; t = 0 shows `from`
+    let fromShape = phase.from;
+    let toShape = phase.to;
+    let t = phase.transition ? easeInOut(pt) : 0;
+    if (forcedState && SHAPE_LABEL[forcedState]) {
+      fromShape = toShape = forcedState;
+      t = 0;
     }
-    if (forcedState === "dna") morph = 0;
-    else if (forcedState === "cube") morph = 1;
 
     // layer twist runs in the middle of the cube hold
     let twistAngle = 0;
@@ -212,9 +305,11 @@
     }
 
     // UI labels
-    progressBar.style.width = `${morph * 100}%`;
-    stateLabel.style.color = morph < 0.5 ? "#1a73e8" : "";
-    targetLabel.style.color = morph >= 0.5 ? "#1a73e8" : "";
+    stateLabel.textContent = SHAPE_LABEL[fromShape];
+    targetLabel.textContent = SHAPE_LABEL[toShape];
+    progressBar.style.width = `${t * 100}%`;
+    stateLabel.style.color = t < 0.5 ? "#1a73e8" : "";
+    targetLabel.style.color = t >= 0.5 ? "#1a73e8" : "";
 
     // scene rotation
     const rotY = now * 0.00038;
@@ -231,37 +326,61 @@
     // slow spin of the DNA around its own axis so the helix visibly rotates
     const dnaSpin = now * 0.0006;
 
+    // the human faces the viewer with a gentle sway instead of the full
+    // scene rotation (a flat figure would vanish edge-on)
+    const sway = Math.sin(now * 0.00045) * 0.24;
+    const hcy = Math.cos(sway), hsy = Math.sin(sway);
+    const hcx = Math.cos(0.05), hsx = Math.sin(0.05);
+
+    const worldPos = (shape, p) => {
+      let m, cy, sy, cx, sx;
+      if (shape === "dna") {
+        m = rotatePoint(p.dna, "y", dnaSpin);
+        cy = cy2; sy = sy2; cx = cx2; sx = sx2;
+      } else if (shape === "cube") {
+        m = p.twist || p.cube;
+        cy = cy2; sy = sy2; cx = cx2; sx = sx2;
+      } else {
+        m = p.human;
+        cy = hcy; sy = hsy; cx = hcx; sx = hsx;
+      }
+      let x = m.x * cy + m.z * sy;
+      let z = -m.x * sy + m.z * cy;
+      const y = m.y * cx - z * sx;
+      z = m.y * sx + z * cx;
+      return { x, y, z };
+    };
+
+    const colorOf = (shape, p) =>
+      shape === "dna" ? p.dnaColor : shape === "cube" ? p.cubeColor : p.humanColor;
+
     const proj = new Array(particles.length);
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
 
-      // resolve model-space position
-      const dnaPos = rotatePoint(p.dna, "y", dnaSpin);
-      const cubePos = p.twist || p.cube;
-      const mx = lerp(dnaPos.x, cubePos.x, morph);
-      const my = lerp(dnaPos.y, cubePos.y, morph);
-      const mz = lerp(dnaPos.z, cubePos.z, morph);
-
-      // world rotation (Y then X)
-      let x = mx * cy2 + mz * sy2;
-      let z = -mx * sy2 + mz * cy2;
-      let y = my * cx2 - z * sx2;
-      z = my * sx2 + z * cx2;
+      const a = worldPos(fromShape, p);
+      const b = t === 0 ? a : worldPos(toShape, p);
+      const x = lerp(a.x, b.x, t);
+      const y = lerp(a.y, b.y, t);
+      const z = lerp(a.z, b.z, t);
 
       const scale = FOV / (FOV + z);
       const sx = centerX + x * scale;
       const sy = centerY + y * scale;
 
-      const r = lerp(p.dnaColor[0], p.cubeColor[0], morph) | 0;
-      const g = lerp(p.dnaColor[1], p.cubeColor[1], morph) | 0;
-      const b = lerp(p.dnaColor[2], p.cubeColor[2], morph) | 0;
+      const cA = colorOf(fromShape, p);
+      const cB = colorOf(toShape, p);
+      const r = lerp(cA[0], cB[0], t) | 0;
+      const g = lerp(cA[1], cB[1], t) | 0;
+      const b2 = lerp(cA[2], cB[2], t) | 0;
 
-      proj[i] = { sx, sy, z, scale, r, g, b, size: p.size };
+      proj[i] = { sx, sy, z, scale, r, g, b: b2, size: p.size };
     }
 
-    // connector lines make the helix read as DNA; they fade out as it
-    // morphs into the cube
-    const lineAlpha = Math.pow(1 - morph, 2);
+    // connector lines make the helix read as DNA; they fade out as the
+    // helix morphs into anything else
+    const dnaWeight = (fromShape === "dna" ? 1 - t : 0) + (toShape === "dna" ? t : 0);
+    const lineAlpha = Math.pow(dnaWeight, 2);
     if (lineAlpha > 0.02) {
       ctx.lineCap = "round";
 
