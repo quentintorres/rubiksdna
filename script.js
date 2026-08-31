@@ -116,109 +116,50 @@
     p.twist = null; // populated during layer twists
   });
 
-  /* ---------- build human targets ---------- */
-  // The third form: a healthy human figure (face, long hair, waving arm,
-  // legs) — the mission: DNA -> solved puzzle -> grown, healthy person.
-  const HUMAN_COLORS = {
-    hair: "#f9ab00",
-    face: "#1a73e8",
-    body: "#34a853",
-    legs: "#12b5cb",
-  };
-  const humanPoints = [];
-
-  function addPolyline(pts, count, color, jitter = 3) {
-    const segs = [];
-    let total = 0;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const L = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
-      segs.push(L);
-      total += L;
+  /* ---------- 3D face & hand targets (baked point clouds) ---------- */
+  // Real volumetric point clouds sampled from scan meshes (see shapes.js):
+  // the mission arc — DNA -> solved puzzle -> grown, healthy human form.
+  function assignShape(key, topHex, botHex) {
+    const flat = (window.RUBIKS_SHAPES && window.RUBIKS_SHAPES[key]) || [];
+    const pts = [];
+    for (let i = 0; i + 2 < flat.length; i += 3) {
+      pts.push({ x: flat[i], y: flat[i + 1], z: flat[i + 2] });
     }
-    for (let k = 0; k < count; k++) {
-      let d = ((k + 0.5) / count) * total;
-      let i = 0;
-      while (d > segs[i] && i < segs.length - 1) { d -= segs[i]; i++; }
-      const t = segs[i] ? d / segs[i] : 0;
-      humanPoints.push({
-        x: lerp(pts[i][0], pts[i + 1][0], t) + (Math.random() - 0.5) * jitter,
-        y: lerp(pts[i][1], pts[i + 1][1], t) + (Math.random() - 0.5) * jitter,
-        z: (Math.random() - 0.5) * 14,
-        color: hexToRgb(color),
-      });
+    if (!pts.length) {
+      // shapes.js missing: fall back to the helix so nothing breaks
+      particles.forEach((p) => { p[key] = p.dna; p[key + "Color"] = p.dnaColor; });
+      return;
     }
+    let minY = Infinity, maxY = -Infinity;
+    pts.forEach((q) => { minY = Math.min(minY, q.y); maxY = Math.max(maxY, q.y); });
+    const top = hexToRgb(topHex), bot = hexToRgb(botHex);
+    particles.forEach((p, i) => {
+      const q = pts[i % pts.length];
+      const t = (q.y - minY) / (maxY - minY); // 0 = top of shape
+      p[key] = q;
+      p[key + "Color"] = [
+        lerp(top[0], bot[0], t),
+        lerp(top[1], bot[1], t),
+        lerp(top[2], bot[2], t),
+      ];
+    });
   }
-
-  function addBezier(p0, p1, p2, count, color, jitter = 5) {
-    for (let k = 0; k < count; k++) {
-      const t = (k + 0.5) / count;
-      const a = (1 - t) * (1 - t), b = 2 * (1 - t) * t, c = t * t;
-      humanPoints.push({
-        x: a * p0[0] + b * p1[0] + c * p2[0] + (Math.random() - 0.5) * jitter,
-        y: a * p0[1] + b * p1[1] + c * p2[1] + (Math.random() - 0.5) * jitter,
-        z: (Math.random() - 0.5) * 16,
-        color: hexToRgb(color),
-      });
-    }
-  }
-
-  function addCircle(cx0, cy0, r, count, color) {
-    for (let k = 0; k < count; k++) {
-      const a = (k / count) * Math.PI * 2;
-      humanPoints.push({
-        x: cx0 + Math.cos(a) * r,
-        y: cy0 + Math.sin(a) * r,
-        z: (Math.random() - 0.5) * 10,
-        color: hexToRgb(color),
-      });
-    }
-  }
-
-  // head + face (y is negative upward in model space)
-  addCircle(0, -185, 34, 56, HUMAN_COLORS.face);
-  addCircle(-12, -192, 3, 6, HUMAN_COLORS.face);                 // left eye
-  addCircle(12, -192, 3, 6, HUMAN_COLORS.face);                  // right eye
-  addPolyline([[-14, -172], [-7, -167], [0, -165], [7, -167], [14, -172]], 16, HUMAN_COLORS.face, 1.5); // smile
-  // long hair: flowing strands down both sides
-  for (let s = 0; s < 4; s++) {
-    addBezier([-4 - s * 3, -219 + s], [-42 - s * 8, -150 - s * 6], [-32 - s * 9, -40 + s * 14], 22, HUMAN_COLORS.hair);
-    addBezier([4 + s * 3, -219 + s], [42 + s * 8, -150 - s * 6], [32 + s * 9, -40 + s * 14], 22, HUMAN_COLORS.hair);
-  }
-  // torso
-  addPolyline([[0, -151], [0, -135]], 10, HUMAN_COLORS.body);    // neck
-  addPolyline([[-50, -128], [50, -128]], 22, HUMAN_COLORS.body); // shoulders
-  addPolyline([[0, -128], [0, -12]], 26, HUMAN_COLORS.body);     // spine
-  addPolyline([[-50, -128], [-32, -12]], 22, HUMAN_COLORS.body);
-  addPolyline([[50, -128], [32, -12]], 22, HUMAN_COLORS.body);
-  addPolyline([[-32, -12], [32, -12]], 14, HUMAN_COLORS.body);   // hips
-  // arms: left relaxed, right raised and waving
-  addPolyline([[-50, -128], [-82, -62], [-88, 8]], 36, HUMAN_COLORS.body);
-  addPolyline([[50, -128], [88, -180], [98, -235]], 36, HUMAN_COLORS.body);
-  addCircle(-88, 14, 7, 8, HUMAN_COLORS.body);                   // left hand
-  addCircle(100, -242, 7, 8, HUMAN_COLORS.body);                 // right hand
-  // legs + feet
-  addPolyline([[-18, -12], [-28, 115], [-32, 235]], 42, HUMAN_COLORS.legs);
-  addPolyline([[18, -12], [28, 115], [32, 235]], 42, HUMAN_COLORS.legs);
-  addPolyline([[-32, 235], [-52, 240]], 8, HUMAN_COLORS.legs);
-  addPolyline([[32, 235], [52, 240]], 8, HUMAN_COLORS.legs);
-
-  particles.forEach((p, idx) => {
-    const hp = humanPoints[idx % humanPoints.length];
-    p.human = { x: hp.x, y: hp.y, z: hp.z };
-    p.humanColor = hp.color;
-  });
+  assignShape("face", "#1a73e8", "#12b5cb");
+  assignShape("hand", "#34a853", "#fbbc04");
 
   /* ---------- morph state machine ---------- */
-  // cycle: helix -> cube (with layer twist) -> human -> helix
+  // cycle: helix -> cube (with layer twist) -> 3D face -> 3D hand -> helix
   const PHASES = [
     { name: "holdDna", from: "dna", to: "cube", dur: 3600, transition: false },
     { name: "toCube", from: "dna", to: "cube", dur: 2600, transition: true },
-    { name: "holdCube", from: "cube", to: "human", dur: 4600, transition: false },
-    { name: "toHuman", from: "cube", to: "human", dur: 2600, transition: true },
-    { name: "holdHuman", from: "human", to: "dna", dur: 4200, transition: false },
-    { name: "toDna", from: "human", to: "dna", dur: 2600, transition: true },
+    { name: "holdCube", from: "cube", to: "face", dur: 4600, transition: false },
+    { name: "toFace", from: "cube", to: "face", dur: 2600, transition: true },
+    { name: "holdFace", from: "face", to: "hand", dur: 4200, transition: false },
+    { name: "toHand", from: "face", to: "hand", dur: 2600, transition: true },
+    { name: "holdHand", from: "hand", to: "dna", dur: 4200, transition: false },
+    { name: "toDna", from: "hand", to: "dna", dur: 2600, transition: true },
   ];
-  const SHAPE_LABEL = { dna: "HELIX", cube: "CUBE", human: "HUMAN" };
+  const SHAPE_LABEL = { dna: "HELIX", cube: "CUBE", face: "FACE", hand: "HAND" };
   let phaseIndex = 0;
   let phaseStart = performance.now();
   let currentMove = null;
@@ -326,11 +267,12 @@
     // slow spin of the DNA around its own axis so the helix visibly rotates
     const dnaSpin = now * 0.0006;
 
-    // the human faces the viewer with a gentle sway instead of the full
-    // scene rotation (a flat figure would vanish edge-on)
-    const sway = Math.sin(now * 0.00045) * 0.24;
+    // the face and hand sway toward the viewer instead of tumbling with
+    // the full scene rotation, so they stay recognizable while still
+    // showing off their 3D volume
+    const sway = Math.sin(now * 0.00042) * 0.7;
     const hcy = Math.cos(sway), hsy = Math.sin(sway);
-    const hcx = Math.cos(0.05), hsx = Math.sin(0.05);
+    const hcx = Math.cos(0.08), hsx = Math.sin(0.08);
 
     const worldPos = (shape, p) => {
       let m, cy, sy, cx, sx;
@@ -341,7 +283,7 @@
         m = p.twist || p.cube;
         cy = cy2; sy = sy2; cx = cx2; sx = sx2;
       } else {
-        m = p.human;
+        m = p[shape];
         cy = hcy; sy = hsy; cx = hcx; sx = hsx;
       }
       let x = m.x * cy + m.z * sy;
@@ -352,7 +294,7 @@
     };
 
     const colorOf = (shape, p) =>
-      shape === "dna" ? p.dnaColor : shape === "cube" ? p.cubeColor : p.humanColor;
+      shape === "dna" ? p.dnaColor : shape === "cube" ? p.cubeColor : p[shape + "Color"];
 
     const proj = new Array(particles.length);
     for (let i = 0; i < particles.length; i++) {
@@ -485,7 +427,8 @@
   if (!el) return;
 
   const LINES = [
-    "$ cubesolver --patient MRN-88412 --tissue dermal",
+    "$ cubesolver --demo synthetic-sample --tissue dermal",
+    "# simulated output — no real data, no real results",
     "",
     "[scan]   loading single-cell methylome......... done",
     "[scan]   scrambled state entropy: 14.82 bits",
