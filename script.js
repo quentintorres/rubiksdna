@@ -1,5 +1,5 @@
 /* ============================================================
-   RUBIKS DNA — hero morph: DNA helix -> Rubik's cube -> healthy human
+   RUBIKS DNA — hero: DNA helix (with gene-block shuffle) <-> Rubik's cube
    Zero dependencies. 3D particles projected onto a 2D canvas.
    ============================================================ */
 
@@ -38,24 +38,33 @@
   }
 
   /* ---------- build DNA targets ---------- */
-  // Two smooth backbone strands + discrete base-pair rungs, each rung a
-  // short bar of particles split into its two complementary base colors.
+  // Two smooth backbone strands + discrete base-pair rungs. Positions are
+  // generated from a parameter f (0..1 along the helix) so whole sections
+  // can slide along the helix during the "gene shuffle" animation.
   const particles = [];
   const nStrand = 160;
   const NUM_RUNGS = 22;
   const RUNG_PARTICLES = 8;
   const rungRanges = []; // particle index ranges, used to draw rung lines
 
+  const strandPos = (s, f, rMul = 1) => {
+    const theta = f * HELIX_TURNS * Math.PI * 2 + s * Math.PI;
+    return {
+      x: Math.cos(theta) * HELIX_RADIUS * rMul,
+      y: (f - 0.5) * HELIX_HEIGHT,
+      z: Math.sin(theta) * HELIX_RADIUS * rMul,
+    };
+  };
+  const rungPos = (f, t, rMul = 1) => {
+    const a = strandPos(0, f, rMul), b = strandPos(1, f, rMul);
+    return { x: lerp(a.x, b.x, t), y: a.y, z: lerp(a.z, b.z, t) };
+  };
+
   for (let s = 0; s < 2; s++) {
     for (let i = 0; i < nStrand; i++) {
-      const f = i / (nStrand - 1);
-      const theta = f * HELIX_TURNS * Math.PI * 2 + s * Math.PI;
       particles.push({
-        dna: {
-          x: Math.cos(theta) * HELIX_RADIUS,
-          y: (f - 0.5) * HELIX_HEIGHT,
-          z: Math.sin(theta) * HELIX_RADIUS,
-        },
+        gen: { kind: "strand", s },
+        f: i / (nStrand - 1),
         dnaColor: hexToRgb(s === 0 ? STRAND_A : STRAND_B),
         size: 3.0,
       });
@@ -64,27 +73,70 @@
 
   for (let k = 0; k < NUM_RUNGS; k++) {
     const f = (k + 0.5) / NUM_RUNGS;
-    const theta = f * HELIX_TURNS * Math.PI * 2;
-    const ax = Math.cos(theta) * HELIX_RADIUS;
-    const az = Math.sin(theta) * HELIX_RADIUS;
-    const y = (f - 0.5) * HELIX_HEIGHT;
     const pair = BASE_PAIRS[((k * 2654435761) >>> 0) % 4];
     const start = particles.length;
 
-    // invisible anchor on strand A so the rung line meets the backbone
-    particles.push({ dna: { x: ax, y, z: az }, dnaColor: hexToRgb(pair[0]), size: 0 });
+    // invisible anchors (t = 0 / 1) so rung lines meet the backbones
+    particles.push({ gen: { kind: "rung", t: 0 }, f, dnaColor: hexToRgb(pair[0]), size: 0 });
     for (let j = 0; j < RUNG_PARTICLES; j++) {
       // two groups of four with a small gap at the pair junction
       const t = j < 4 ? 0.10 + j * 0.12 : 0.54 + (j - 4) * 0.12;
       particles.push({
-        dna: { x: lerp(ax, -ax, t), y, z: lerp(az, -az, t) },
+        gen: { kind: "rung", t },
+        f,
         dnaColor: hexToRgb(j < 4 ? pair[0] : pair[1]),
         size: 2.6,
       });
     }
-    // invisible anchor on strand B
-    particles.push({ dna: { x: -ax, y, z: -az }, dnaColor: hexToRgb(pair[1]), size: 0 });
+    particles.push({ gen: { kind: "rung", t: 1 }, f, dnaColor: hexToRgb(pair[1]), size: 0 });
     rungRanges.push({ start, count: RUNG_PARTICLES + 2 });
+  }
+
+  // model-space helix position for a particle's current parameters
+  const dnaModel = (p) =>
+    p.shufflePos ||
+    (p.gen.kind === "strand" ? strandPos(p.gen.s, p.f) : rungPos(p.f, p.gen.t));
+
+  /* ---------- mobile helix blocks ---------- */
+  // Three sections of the helix are solid Rubik colors. During the DNA
+  // hold they do a cube-style shuffle: lift off the axis, corkscrew along
+  // the helix to another block's slot, and lock back in.
+  const NUM_BANDS = 9;
+  const BLOCKS = [
+    { band: 1, color: "#ff5800" },
+    { band: 4, color: "#a142f4" },
+    { band: 7, color: "#009b48" },
+  ];
+  BLOCKS.forEach((blk, bi) => {
+    const lo = blk.band / NUM_BANDS, hi = (blk.band + 1) / NUM_BANDS;
+    const rgb = hexToRgb(blk.color);
+    particles.forEach((p) => {
+      if (p.f >= lo && p.f < hi) {
+        p.block = bi;
+        p.dnaColor = rgb; // whole section one color so the move reads
+      }
+    });
+  });
+
+  const blockSlots = BLOCKS.map((b) => b.band); // which band each block sits in now
+  let activeMove = null; // { window, members: [{ p, fFrom, fTo }] }
+
+  function startBlockSwap() {
+    const i = Math.floor(Math.random() * BLOCKS.length);
+    let j = Math.floor(Math.random() * (BLOCKS.length - 1));
+    if (j >= i) j++;
+    const di = (blockSlots[j] - blockSlots[i]) / NUM_BANDS;
+    const members = [];
+    particles.forEach((p) => {
+      if (p.block === i) members.push({ p, fFrom: p.f, fTo: p.f + di });
+      else if (p.block === j) members.push({ p, fFrom: p.f, fTo: p.f - di });
+    });
+    [blockSlots[i], blockSlots[j]] = [blockSlots[j], blockSlots[i]];
+    return { members };
+  }
+
+  function commitBlockSwap(mv) {
+    mv.members.forEach((m) => { m.p.f = m.fTo; m.p.shufflePos = null; });
   }
 
   /* ---------- build Rubik's cube targets ---------- */
@@ -116,50 +168,17 @@
     p.twist = null; // populated during layer twists
   });
 
-  /* ---------- 3D face & hand targets (baked point clouds) ---------- */
-  // Real volumetric point clouds sampled from scan meshes (see shapes.js):
-  // the mission arc — DNA -> solved puzzle -> grown, healthy human form.
-  function assignShape(key, topHex, botHex) {
-    const flat = (window.RUBIKS_SHAPES && window.RUBIKS_SHAPES[key]) || [];
-    const pts = [];
-    for (let i = 0; i + 2 < flat.length; i += 3) {
-      pts.push({ x: flat[i], y: flat[i + 1], z: flat[i + 2] });
-    }
-    if (!pts.length) {
-      // shapes.js missing: fall back to the helix so nothing breaks
-      particles.forEach((p) => { p[key] = p.dna; p[key + "Color"] = p.dnaColor; });
-      return;
-    }
-    let minY = Infinity, maxY = -Infinity;
-    pts.forEach((q) => { minY = Math.min(minY, q.y); maxY = Math.max(maxY, q.y); });
-    const top = hexToRgb(topHex), bot = hexToRgb(botHex);
-    particles.forEach((p, i) => {
-      const q = pts[i % pts.length];
-      const t = (q.y - minY) / (maxY - minY); // 0 = top of shape
-      p[key] = q;
-      p[key + "Color"] = [
-        lerp(top[0], bot[0], t),
-        lerp(top[1], bot[1], t),
-        lerp(top[2], bot[2], t),
-      ];
-    });
-  }
-  assignShape("face", "#1a73e8", "#12b5cb");
-  assignShape("hand", "#34a853", "#fbbc04");
-
   /* ---------- morph state machine ---------- */
-  // cycle: helix -> cube (with layer twist) -> 3D face -> 3D hand -> helix
+  // cycle: helix (with block shuffle) -> cube (with layer twist) -> helix
   const PHASES = [
-    { name: "holdDna", from: "dna", to: "cube", dur: 3600, transition: false },
+    { name: "holdDna", from: "dna", to: "cube", dur: 11000, transition: false },
     { name: "toCube", from: "dna", to: "cube", dur: 2600, transition: true },
-    { name: "holdCube", from: "cube", to: "face", dur: 4600, transition: false },
-    { name: "toFace", from: "cube", to: "face", dur: 2600, transition: true },
-    { name: "holdFace", from: "face", to: "hand", dur: 4200, transition: false },
-    { name: "toHand", from: "face", to: "hand", dur: 2600, transition: true },
-    { name: "holdHand", from: "hand", to: "dna", dur: 4200, transition: false },
-    { name: "toDna", from: "hand", to: "dna", dur: 2600, transition: true },
+    { name: "holdCube", from: "cube", to: "dna", dur: 4600, transition: false },
+    { name: "toDna", from: "cube", to: "dna", dur: 2600, transition: true },
   ];
-  const SHAPE_LABEL = { dna: "HELIX", cube: "CUBE", face: "FACE", hand: "HAND" };
+  const SHAPE_LABEL = { dna: "HELIX", cube: "CUBE" };
+  // block shuffles run in these windows of the DNA hold (after ~one spin)
+  const MOVE_WINDOWS = [[0.50, 0.66], [0.74, 0.90]];
   let phaseIndex = 0;
   let phaseStart = performance.now();
   let currentMove = null;
@@ -264,37 +283,47 @@
     ctx.clearRect(0, 0, W, H);
     // normal compositing: additive blending washes out on a white background
 
-    // slow spin of the DNA around its own axis so the helix visibly rotates
-    const dnaSpin = now * 0.0006;
+    // spin of the DNA around its own axis so the helix visibly rotates
+    const dnaSpin = now * 0.0011;
 
-    // the face and hand sway toward the viewer instead of tumbling with
-    // the full scene rotation, so they stay recognizable while still
-    // showing off their 3D volume
-    const sway = Math.sin(now * 0.00042) * 0.7;
-    const hcy = Math.cos(sway), hsy = Math.sin(sway);
-    const hcx = Math.cos(0.08), hsx = Math.sin(0.08);
+    // gene-block shuffle: after ~one spin of the DNA hold, two colored
+    // blocks lift off the axis and corkscrew along the helix to swap slots
+    if (phase.name === "holdDna") {
+      const w = MOVE_WINDOWS.findIndex(([w0, w1]) => pt >= w0 && pt < w1);
+      if (w !== -1) {
+        if (!activeMove || activeMove.window !== w) {
+          if (activeMove) commitBlockSwap(activeMove);
+          activeMove = Object.assign(startBlockSwap(), { window: w });
+        }
+        const [w0, w1] = MOVE_WINDOWS[w];
+        const wt = (pt - w0) / (w1 - w0);
+        const prog = easeInOut(wt);
+        const lift = 1 + 0.45 * Math.sin(Math.PI * wt); // out, across, back in
+        activeMove.members.forEach((m) => {
+          const f = lerp(m.fFrom, m.fTo, prog);
+          m.p.shufflePos = m.p.gen.kind === "strand"
+            ? strandPos(m.p.gen.s, f, lift)
+            : rungPos(f, m.p.gen.t, lift);
+        });
+      } else if (activeMove) {
+        commitBlockSwap(activeMove);
+        activeMove = null;
+      }
+    } else if (activeMove) {
+      commitBlockSwap(activeMove);
+      activeMove = null;
+    }
 
     const worldPos = (shape, p) => {
-      let m, cy, sy, cx, sx;
-      if (shape === "dna") {
-        m = rotatePoint(p.dna, "y", dnaSpin);
-        cy = cy2; sy = sy2; cx = cx2; sx = sx2;
-      } else if (shape === "cube") {
-        m = p.twist || p.cube;
-        cy = cy2; sy = sy2; cx = cx2; sx = sx2;
-      } else {
-        m = p[shape];
-        cy = hcy; sy = hsy; cx = hcx; sx = hsx;
-      }
-      let x = m.x * cy + m.z * sy;
-      let z = -m.x * sy + m.z * cy;
-      const y = m.y * cx - z * sx;
-      z = m.y * sx + z * cx;
+      const m = shape === "dna" ? rotatePoint(dnaModel(p), "y", dnaSpin) : p.twist || p.cube;
+      let x = m.x * cy2 + m.z * sy2;
+      let z = -m.x * sy2 + m.z * cy2;
+      const y = m.y * cx2 - z * sx2;
+      z = m.y * sx2 + z * cx2;
       return { x, y, z };
     };
 
-    const colorOf = (shape, p) =>
-      shape === "dna" ? p.dnaColor : shape === "cube" ? p.cubeColor : p[shape + "Color"];
+    const colorOf = (shape, p) => (shape === "dna" ? p.dnaColor : p.cubeColor);
 
     const proj = new Array(particles.length);
     for (let i = 0; i < particles.length; i++) {
@@ -326,9 +355,13 @@
     if (lineAlpha > 0.02) {
       ctx.lineCap = "round";
 
-      // backbone strands
+      // backbone strands (skip stretches where a shuffled block has moved
+      // away from its array neighbours — the gap makes blocks read as
+      // detachable cassettes)
+      const fStep = 1 / (nStrand - 1);
       for (let s = 0; s < 2; s++) {
         for (let i = s * nStrand; i < s * nStrand + nStrand - 1; i++) {
+          if (Math.abs(particles[i + 1].f - particles[i].f) > 2.5 * fStep) continue;
           const a = proj[i], b2 = proj[i + 1];
           const sc = (a.scale + b2.scale) / 2;
           const alpha = lineAlpha * Math.min(Math.max(0.75 * sc - 0.2, 0.12), 0.6);
