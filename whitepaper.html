@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>White Paper v1.0 — RUBIKS DNA</title>
+  <meta name="description" content="RUBIKS DNA founding document. Sequence is memory. Regulation is control. Longevity is keeping the system solvable." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 76'><g transform='translate(0,14)'><rect x='2' y='6' width='8' height='8' rx='2' fill='%23009b48'/><rect x='3' y='16' width='6' height='6' rx='1.5' fill='%23b71234'/><rect x='3' y='26' width='6' height='6' rx='1.5' fill='%23ffd500'/><rect x='2' y='34' width='8' height='8' rx='2' fill='%230046ad'/><rect x='12' y='20' width='8' height='8' rx='2' fill='%23ff5800'/><rect x='22' y='34' width='8' height='8' rx='2' fill='%23009b48'/><rect x='23' y='26' width='6' height='6' rx='1.5' fill='%23b71234'/><rect x='23' y='16' width='6' height='6' rx='1.5' fill='%23ffd500'/><rect x='22' y='6' width='8' height='8' rx='2' fill='%230046ad'/><rect x='32' y='20' width='8' height='8' rx='2' fill='%23eceff1'/><rect x='42' y='6' width='8' height='8' rx='2' fill='%23009b48'/><rect x='43' y='16' width='6' height='6' rx='1.5' fill='%23b71234'/><rect x='43' y='26' width='6' height='6' rx='1.5' fill='%23ffd500'/><rect x='42' y='34' width='8' height='8' rx='2' fill='%230046ad'/><rect x='52' y='20' width='8' height='8' rx='2' fill='%23ff5800'/><rect x='62' y='34' width='8' height='8' rx='2' fill='%23009b48'/><rect x='63' y='26' width='6' height='6' rx='1.5' fill='%23b71234'/><rect x='63' y='16' width='6' height='6' rx='1.5' fill='%23ffd500'/><rect x='62' y='6' width='8' height='8' rx='2' fill='%230046ad'/></g></svg>" />
+</head>
+<body class="paper-body">
+
+  <header class="nav">
+    <a class="nav__logo" href="index.html">
+      <svg class="nav__logo-mark" aria-hidden="true" width="42" height="26" viewBox="0 0 76 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="rgba(0,0,0,0.12)" stroke-width="1">
+          <rect x="2"  y="6"  width="8" height="8" rx="2" fill="#009b48"/>
+          <rect x="3"  y="16" width="6" height="6" rx="1.5" fill="#b71234"/>
+          <rect x="3"  y="26" width="6" height="6" rx="1.5" fill="#ffd500"/>
+          <rect x="2"  y="34" width="8" height="8" rx="2" fill="#0046ad"/>
+          <rect x="12" y="20" width="8" height="8" rx="2" fill="#ff5800"/>
+          <rect x="22" y="34" width="8" height="8" rx="2" fill="#009b48"/>
+          <rect x="23" y="26" width="6" height="6" rx="1.5" fill="#b71234"/>
+          <rect x="23" y="16" width="6" height="6" rx="1.5" fill="#ffd500"/>
+          <rect x="22" y="6"  width="8" height="8" rx="2" fill="#0046ad"/>
+          <rect x="32" y="20" width="8" height="8" rx="2" fill="#eceff1"/>
+          <rect x="42" y="6"  width="8" height="8" rx="2" fill="#009b48"/>
+          <rect x="43" y="16" width="6" height="6" rx="1.5" fill="#b71234"/>
+          <rect x="43" y="26" width="6" height="6" rx="1.5" fill="#ffd500"/>
+          <rect x="42" y="34" width="8" height="8" rx="2" fill="#0046ad"/>
+          <rect x="52" y="20" width="8" height="8" rx="2" fill="#ff5800"/>
+          <rect x="62" y="34" width="8" height="8" rx="2" fill="#009b48"/>
+          <rect x="63" y="26" width="6" height="6" rx="1.5" fill="#b71234"/>
+          <rect x="63" y="16" width="6" height="6" rx="1.5" fill="#ffd500"/>
+          <rect x="62" y="6"  width="8" height="8" rx="2" fill="#0046ad"/>
+        </g>
+      </svg>
+      RUBIKS<span class="accent">DNA</span>
+    </a>
+    <nav class="nav__links">
+      <a href="index.html#work">Work</a>
+      <a href="index.html#science">Science</a>
+      <a href="index.html#moves">Moves</a>
+      <a href="whitepaper.html" class="is-active">Paper</a>
+      <a href="index.html#principles">Principles</a>
+    </nav>
+    <a class="btn btn--ghost nav__cta" href="index.html">← Home</a>
+  </header>
+
+  <article class="paper">
+
+    <header class="paper__head">
+      <p class="eyebrow">White Paper · Version 1.0 · Founding document</p>
+      <h1>RUBIKS DNA</h1>
+      <p class="paper__tagline">
+        Sequence is memory. Regulation is control.<br />
+        Longevity is keeping the system solvable.
+      </p>
+      <p class="paper__disclaimer">
+        Not a claim of completed human genome redesign. A research mission grounded
+        in what biology already shows.
+      </p>
+    </header>
+
+    <nav class="paper__toc" aria-label="Contents">
+      <p class="mono paper__toc-title">Contents</p>
+      <ol>
+        <li><a href="#abstract">Abstract</a></li>
+        <li><a href="#s1">Mission</a></li>
+        <li><a href="#s2">What DNA is actually for</a></li>
+        <li><a href="#s3">Why a cube, not a ladder</a></li>
+        <li><a href="#s4">Scientific foundation</a></li>
+        <li><a href="#s5">What "architect DNA" should mean here</a></li>
+        <li><a href="#s6">Research agenda</a></li>
+        <li><a href="#s7">Claims we will not make</a></li>
+        <li><a href="#s8">Ethics and constraints</a></li>
+        <li><a href="#s9">Organizational stance</a></li>
+      </ol>
+    </nav>
+
+    <section id="abstract">
+      <h2>Abstract</h2>
+      <p>
+        DNA is the cell's long-term memory: a polymer that stores how to build proteins
+        and regulatory RNA. It is not the live controller of the body. Day-to-day control
+        sits in networks that read DNA — transcription factors, epigenetics, nutrient
+        sensors, damage signals, and intercellular communication.
+      </p>
+      <p>
+        Aging is the progressive loss of that controllability. Cells accumulate genomic
+        damage, epigenetic noise, failed protein quality control, weak autophagy,
+        mitochondrial failure, senescent cells, exhausted stem cells, and chronic
+        inflammation. These processes are now grouped as twelve interconnected hallmarks
+        of aging. They appear with age, worsen aging when forced, and can be slowed or
+        partly reversed when targeted.
+      </p>
+      <p>
+        RUBIKS DNA exists to treat this as an architecture problem, not a wellness slogan.
+        The cube metaphor is exact enough to be useful: many coupled faces, few legal
+        moves, and a scramble that gets harder as constraints stack. The work is to find
+        the short sequences of moves — genetic, epigenetic, and circuit-level — that
+        restore function without collapsing cell identity.
+      </p>
+      <p>
+        This paper states the mission, the science we accept as established, the research
+        we will pursue, and the claims we refuse to make.
+      </p>
+    </section>
+
+    <section id="s1">
+      <h2><span class="paper__num">1</span> Mission</h2>
+      <p class="paper__lead">
+        Map the controllable layers of the genome and its read-out, then design
+        interventions that restore cellular function with the fewest, safest moves.
+      </p>
+      <p>We exist to:</p>
+      <ul>
+        <li>Separate stored information (DNA sequence) from runtime control (how that information is used).</li>
+        <li>Build tools that measure where a cell or tissue sits in its functional state space.</li>
+        <li>Design genetic and epigenetic architectures that improve repair, identity, and resilience.</li>
+        <li>Translate only what is mechanistically justified and ethically constrained.</li>
+      </ul>
+      <p>
+        We do not exist to sell immortality, "rewrite your DNA" consumer kits, or a fake
+        number of aging states.
+      </p>
+    </section>
+
+    <section id="s2">
+      <h2><span class="paper__num">2</span> What DNA is actually for</h2>
+      <p>
+        DNA is a four-letter archive (A, T, C, G). In humans it is about three billion
+        base pairs per haploid genome. Most of it does not code for proteins. The useful
+        fraction includes:
+      </p>
+      <ul>
+        <li><strong>Protein-coding genes</strong> — recipes for enzymes, structure, receptors, repair machinery.</li>
+        <li><strong>Regulatory DNA</strong> — promoters, enhancers, silencers that decide <em>when</em> and <em>how much</em>.</li>
+        <li><strong>Noncoding RNA genes</strong> — molecules that help control other genes.</li>
+        <li><strong>Structural sequence</strong> — centromeres, telomeres, replication origins.</li>
+      </ul>
+      <p>
+        The cell does not "run DNA" the way a CPU runs a program. It transcribes selected
+        regions into RNA, translates some RNA into protein, and marks DNA and histones so
+        the same genome can be a neuron in one cell and a hepatocyte in another.
+      </p>
+
+      <table class="paper__table">
+        <thead>
+          <tr><th>Layer</th><th>Role</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>DNA sequence</td><td>Long-term memory / parts list</td></tr>
+          <tr><td>Epigenetic marks</td><td>Which chapters are open</td></tr>
+          <tr><td>Transcription factor networks</td><td>Immediate control logic</td></tr>
+          <tr><td>Nutrients, damage, hormones</td><td>Inputs to that logic</td></tr>
+          <tr><td>Protein and organelle quality control</td><td>Housekeeping that keeps the machine runnable</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        If sequence is a book, aging is both torn pages and a reader who can no longer
+        find the right chapter. Architecting DNA without architecting control is
+        incomplete. Architecting control without respecting sequence constraints is unsafe.
+      </p>
+    </section>
+
+    <section id="s3">
+      <h2><span class="paper__num">3</span> Why a cube, not a ladder</h2>
+      <p>
+        Popular aging talk is linear: damage piles up, you decline. That is partly true.
+        It is not the whole picture.
+      </p>
+      <p>A more useful model:</p>
+      <ul>
+        <li>A cell has many coupled variables (repair, identity, inflammation, energy, waste clearance).</li>
+        <li>Those variables form a state space.</li>
+        <li>Healthy function is a compact region of that space.</li>
+        <li>Aging is drift plus loss of the ability to return to that region after stress.</li>
+        <li>Interventions are moves. Some commute. Some do not. Order matters.</li>
+      </ul>
+      <p>
+        This is why the Rubik's metaphor is better than a ladder. You cannot solve one face
+        by smashing another. Full Yamanaka reprogramming can reset age marks and also erase
+        cell identity — a solved cube that is no longer a liver cell. Partial, pulsed
+        reprogramming tries to turn only the faces that restore youth-like function while
+        leaving identity intact. That is the difference between a legal move and taking the
+        cube apart.
+      </p>
+      <aside class="paper__callout">
+        We will not publish a precise census such as "4.3 × 10<sup>19</sup> states." That
+        number is a branding invention unless derived from an explicit, public model.
+        Combinatorial state spaces are enormous if you discretize many biomarkers. The
+        exact integer is a choice of bins, not a measurement of nature.
+      </aside>
+    </section>
+
+    <section id="s4">
+      <h2><span class="paper__num">4</span> Scientific foundation (what is already real)</h2>
+
+      <h3>4.1 Twelve hallmarks, not one cause</h3>
+      <p>
+        López-Otín, Blasco, Partridge, Serrano, and Kroemer (2023) updated the hallmarks
+        of aging to twelve:
+      </p>
+      <p class="paper__hallmarks">
+        genomic instability · telomere attrition · epigenetic alterations · loss of
+        proteostasis · disabled macroautophagy · deregulated nutrient-sensing ·
+        mitochondrial dysfunction · cellular senescence · stem cell exhaustion · altered
+        intercellular communication · chronic inflammation · dysbiosis
+      </p>
+      <p>
+        Three tests define a hallmark: it appears with age; making it worse accelerates
+        aging; targeting it can slow or partly reverse aging. They are networked. Hitting
+        autophagy changes nutrient sensing. Hitting senescence changes inflammation. There
+        is no single "aging gene" to overwrite.
+      </p>
+      <p class="paper__implication">
+        <strong>RUBIKS implication:</strong> a genome architecture program must target
+        coupled hallmarks, or it will solve one face and scramble three others.
+      </p>
+
+      <h3>4.2 The genome is already an engineering substrate</h3>
+      <p>
+        CRISPR/Cas9 is not science fiction. Casgevy (exagamglogene autotemcel) edits a
+        patient's own blood stem cells to reactivate fetal hemoglobin and is FDA-approved
+        for sickle cell disease and transfusion-dependent β-thalassemia; the label has been
+        extended to young children. That is sequence-level architecture used as medicine —
+        still narrow, still hard, still real.
+      </p>
+      <p>What this proves:</p>
+      <ul>
+        <li>We can make precise, therapeutic cuts in human DNA in defined cell types.</li>
+        <li>Delivery, manufacturing, off-targets, and immune risk remain the bottleneck.</li>
+        <li>Whole-body "redesign the human genome for longevity" is not the same as editing <em>BCL11A</em> in hematopoietic stem cells.</li>
+      </ul>
+
+      <h3>4.3 Control lives above the sequence</h3>
+      <p>
+        DNA methylation clocks estimate biological age from CpG marks. Horvath's pan-tissue
+        clock and later clocks (PhenoAge, GrimAge, pan-mammalian clocks) show that the
+        read-out layer tracks age and, in many studies, mortality risk better than
+        chronological age alone. Clocks are not aging itself. They are a compressed
+        projection of state. They are good enough to treat as instruments, if we do not
+        worship them as the thing being measured.
+      </p>
+
+      <h3>4.4 Identity can be kept while some age marks move</h3>
+      <p>
+        Yamanaka factors (OCT4, SOX2, KLF4, MYC) can return a differentiated cell to
+        pluripotency. Full induction risks tumors and identity loss. Ocampo, Belmonte and
+        colleagues showed that cyclic, short OSKM expression in a progeria mouse model
+        improved aging hallmarks and extended lifespan without the full pluripotent reset.
+        Transient factor expression in human cells can move epigenetic age and some
+        functional marks while preserving identity. This is the most important existence
+        proof that "solve some faces, leave the others" is biologically possible. It is not
+        yet a human longevity therapy. First-in-human work is being aimed at isolated
+        tissues (for example, the eye) precisely because the blast radius is smaller.
+      </p>
+
+      <h3>4.5 Nutrient sensing is a control law already in the wild</h3>
+      <p>
+        mTOR, AMPK, insulin/IGF-1, and sirtuins are the body's existing controllers for
+        growth versus repair. Fasting, calorie restriction, and protein/amino-acid
+        restriction change those controllers and raise autophagy. That is why a 75-hour
+        fast is not the same as "clean food in a deficit," and why 18:6 keto is closer than
+        random eating but still not an empty multi-day state. These are control inputs, not
+        DNA rewrites. Any DNA-architecture program that ignores them will over-edit and
+        under-control.
+      </p>
+
+      <h3>4.6 Synthetic circuits are how you add new control, not just new genes</h3>
+      <p>
+        Mammalian cells can host designed logic: inducible promoters, CRISPR-based
+        transcription factors, feedforward and feedback circuits, multi-input gates. That is
+        cybergenetics: treat gene expression as a plant to be controlled, not a static
+        cassette. This is how "architect DNA" should be interpreted in the medium term —
+        add sensors and limiters, not dump extra genes into every cell.
+      </p>
+    </section>
+
+    <section id="s5">
+      <h2><span class="paper__num">5</span> What "architect DNA" should mean here</h2>
+      <p>Four layers. We work them in order of leverage and safety.</p>
+
+      <div class="paper__layers">
+        <div class="paper__layer">
+          <span class="mono">Layer A — Measurement architecture</span>
+          <p>Multi-omic state vectors: methylation clocks, proteomics, senescent-cell burden, mitochondrial function, autophagy flux proxies, inflammatory set points.</p>
+          <p class="paper__goal">Goal: know which face is scrambled before touching the cube.</p>
+        </div>
+        <div class="paper__layer">
+          <span class="mono">Layer B — Control-layer engineering (epigenetic / circuit)</span>
+          <p>Partial reprogramming payloads, CRISPRa/i, synthetic promoters, kill switches, tissue-restricted drivers.</p>
+          <p class="paper__goal">Goal: restore youthful use of existing sequence.</p>
+        </div>
+        <div class="paper__layer">
+          <span class="mono">Layer C — Sequence repair and reinforcement</span>
+          <p>Targeted edits for monogenic drivers, extra copies of repair genes in defined cells, mitochondrial quality-control support, telomere-maintenance only where justified.</p>
+          <p class="paper__goal">Goal: fix torn pages, do not rewrite the novel.</p>
+        </div>
+        <div class="paper__layer">
+          <span class="mono">Layer D — System integration</span>
+          <p>How a move in liver changes immune tone; how mTOR inhibition interacts with a reprogramming pulse; how refeeding after nutrient deprivation completes a repair cycle.</p>
+          <p class="paper__goal">Goal: legal move sequences, not isolated tricks.</p>
+        </div>
+      </div>
+
+      <p>
+        The product of this program is not "a new human genome." It is a library of
+        validated moves with known coupling, dose, tissue, and stop conditions.
+      </p>
+    </section>
+
+    <section id="s6">
+      <h2><span class="paper__num">6</span> Research agenda</h2>
+
+      <h3>Near term (tools)</h3>
+      <ul>
+        <li>Publish an explicit, open state model: which variables, which units, which couplings. No invented state counts.</li>
+        <li>Compare interventions by control cost: how much function is restored per unit of risk.</li>
+        <li>Prefer ex vivo and spatially confined in vivo systems (blood, skin, eye, organoids) before systemic payloads.</li>
+      </ul>
+
+      <h3>Mid term (moves)</h3>
+      <ul>
+        <li>Map which hallmark clusters move together under partial reprogramming, mTOR modulation, and senescent-cell clearance.</li>
+        <li>Build synthetic circuits with hard off-switches and cell-type restriction.</li>
+        <li>Test whether sequence-level repair of high-impact loci plus control-layer reset beats either alone.</li>
+      </ul>
+
+      <h3>Long term (translation)</h3>
+      <ul>
+        <li>Combination protocols only after single-move toxicity is known.</li>
+        <li>Human studies that treat aging-adjacent disease first (fibrosis, degenerative eye disease, immune aging), not "longevity" as an indication until regulators and biomarkers are ready.</li>
+      </ul>
+    </section>
+
+    <section id="s7">
+      <h2><span class="paper__num">7</span> Claims we will not make</h2>
+      <ul class="paper__nots">
+        <li>That aging has been counted as 4.3 × 10<sup>19</sup> discrete states.</li>
+        <li>That we can upload a solved genome into an adult.</li>
+        <li>That CRISPR approved for sickle cell implies CRISPR for lifespan.</li>
+        <li>That epigenetic clock change equals rejuvenation of the person.</li>
+        <li>That fasting, keto, or supplements are DNA architecture.</li>
+        <li>That more autophagy is always better. Excessive autophagy can destroy tissue.</li>
+      </ul>
+      <p class="paper__lead">Honesty is part of the architecture. A cube with hidden stickers is not solved.</p>
+    </section>
+
+    <section id="s8">
+      <h2><span class="paper__num">8</span> Ethics and constraints</h2>
+      <ul>
+        <li><strong>Identity first.</strong> A younger cell that is no longer the right cell type is a failure.</li>
+        <li><strong>Containment.</strong> Every constructive circuit needs an off switch.</li>
+        <li><strong>No germline consumer product.</strong> Somatic, consented, tissue-limited work only unless a separate, publicly justified program exists.</li>
+        <li><strong>Equity of risk.</strong> First experiments must not be dumped on people with the least protection.</li>
+        <li><strong>Publish negative couplings.</strong> If two moves fight, that is a result.</li>
+      </ul>
+    </section>
+
+    <section id="s9">
+      <h2><span class="paper__num">9</span> Organizational stance</h2>
+      <p>
+        RUBIKS DNA is a research organization. Its output is models, tools, papers, and —
+        only later — regulated therapeutic programs.
+      </p>
+      <aside class="paper__callout paper__callout--north">
+        <span class="mono">North star metric</span>
+        Increase the fraction of biological state space from which a tissue can still
+        return to function, without losing identity.
+        <br /><br />
+        That is controllability. That is the solve.
+      </aside>
+    </section>
+
+    <p class="paper__closing">
+      Not every scramble has a short solution.<br />
+      <span class="gradient-text">The work is finding which ones do.</span>
+    </p>
+
+  </article>
+
+  <footer class="footer">
+    <span>© 2026 RUBIKS DNA — an independent research organization</span>
+    <span class="mono">White Paper v1.0</span>
+  </footer>
+
+</body>
+</html>
