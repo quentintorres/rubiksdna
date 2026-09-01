@@ -190,6 +190,26 @@ h1, h2, h3 { font-family: var(--font-display); }
 
 .hero__actions { display: flex; gap: 1rem; flex-wrap: wrap; }
 
+.hero__status {
+  margin-top: 2rem;
+  max-width: 540px;
+  padding: 1rem 1.2rem;
+  border: 1px dashed #dadce0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.hero__status .mono {
+  display: inline-block;
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-right: 0.6rem;
+}
+
 .hero__morph-label {
   margin-top: 3.2rem;
   display: flex;
@@ -458,7 +478,8 @@ h1, h2, h3 { font-family: var(--font-display); }
   padding-top: 3.5rem;
   border-top: 1px solid var(--line);
 }
-.dodont__title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.2rem; }
+.dodont__title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
+.dodont__note { color: #9aa0a6; font-size: 0.88rem; margin-bottom: 1.1rem; }
 .dodont__list { list-style: none; display: grid; gap: 0.8rem; }
 .dodont__list li {
   display: flex;
@@ -697,6 +718,12 @@ h1, h2, h3 { font-family: var(--font-display); }
   color: var(--text-dim);
   font-size: 1rem;
 }
+.paper__callout--status {
+  border-left-color: var(--amber);
+  background: #fffbf2;
+  margin-top: 2rem;
+}
+.paper__callout--status .mono { color: #b06000; }
 .paper__callout--north {
   border-left-color: var(--blue);
   font-family: var(--font-display);
