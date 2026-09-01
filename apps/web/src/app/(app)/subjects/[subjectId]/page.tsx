@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 import { schema, withOrg } from "@rubiksdna/db";
 import { createIntervention, createSample } from "@/lib/actions";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/org";
 import { EpisodeBuilder } from "./episode-builder";
+import { TimepointCompare } from "./timepoint-compare";
 
 export const dynamic = "force-dynamic";
 
@@ -39,11 +40,24 @@ export default async function SubjectPage({
       .from(schema.episodes)
       .where(eq(schema.episodes.subjectId, subjectId))
       .orderBy(desc(schema.episodes.createdAt));
-    return { subject, samples, interventions, episodes };
+    const deltas =
+      episodes.length === 0
+        ? []
+        : await tx
+            .select()
+            .from(schema.deltaResults)
+            .where(inArray(schema.deltaResults.episodeId, episodes.map((e) => e.id)));
+    return { subject, samples, interventions, episodes, deltas };
   });
 
   if (!data) notFound();
-  const { subject, samples, interventions, episodes } = data;
+  const { subject, samples, interventions, episodes, deltas } = data;
+  const deltasByEpisode = new Map<string, typeof deltas>();
+  for (const delta of deltas) {
+    const list = deltasByEpisode.get(delta.episodeId) ?? [];
+    list.push(delta);
+    deltasByEpisode.set(delta.episodeId, list);
+  }
 
   return (
     <div className="space-y-6">
@@ -148,6 +162,8 @@ export default async function SubjectPage({
             interventions={interventions.map((iv) => ({ id: iv.id, label: `${iv.category}: ${iv.agent}` }))}
             episodes={episodes.map((e) => ({ id: e.id, label: e.label ?? e.id.slice(0, 8) }))}
           />
+
+          <TimepointCompare episodes={episodes} deltasByEpisode={deltasByEpisode} />
         </section>
 
         <aside className="space-y-6">

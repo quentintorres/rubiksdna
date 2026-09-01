@@ -12,6 +12,7 @@ import {
 import { parseBetaMatrix, parseChemPanel, runSampleQc } from "@rubiksdna/ingest";
 import { scoreAllAxes } from "@rubiksdna/axes";
 import { db } from "@/lib/db";
+import { serverEnv } from "@/lib/env";
 import { log } from "@/lib/log";
 import { getObjectText, objectKeys, putObject } from "@/lib/storage";
 import { renderReportPdf } from "@/lib/render-pdf";
@@ -168,22 +169,76 @@ export const processDataFile = inngest.createFunction(
         };
       });
 
+      /**
+       * Feature matrix + clocks: delegated to the Modal Python worker when
+       * configured (Parquet in R2, heavy compute off Vercel). The TypeScript
+       * engine is the fallback and the semantic reference — the worker's
+       * golden tests assert exact parity, so which plane ran is an
+       * infrastructure detail, never a scientific one.
+       */
+      const eligibleClockIds = resolveClocksForOrg(context.orgType)
+        .filter((clock) => clock.tissue === "multi-tissue" || context.tissue === "whole_blood")
+        .map((clock) => clock.id);
+
+      const workerResult = await step.run("worker-process", async () => {
+        const env = serverEnv();
+        if (!env.WORKER_URL) return null;
+        const response = await fetch(env.WORKER_URL, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-worker-secret": env.WORKER_SHARED_SECRET ?? "",
+          },
+          body: JSON.stringify({
+            org_id: orgId,
+            sample_id: sampleId,
+            platform: context.platform,
+            tissue: context.tissue,
+            pipeline_version: PIPELINE_VERSION,
+            betas: parsed.rawBetas,
+            clock_ids: eligibleClockIds,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(`worker returned ${response.status}`);
+        }
+        return (await response.json()) as {
+          feature_matrix_key: string;
+          probe_count: number;
+          clocks: Array<{
+            clock_id: string;
+            clock_version: string;
+            value: number | null;
+            probes_used: number;
+            probes_imputed: number;
+            refused_reason: string | null;
+          }>;
+        };
+      });
+
       await step.run("write-feature-matrix", async () => {
-        // Full harmonized matrix to object storage (CSV-in-R2 for v1; the
-        // Python worker writes Parquet when it takes over heavy compute).
-        const key = objectKeys.featureMatrix(orgId, sampleId, PIPELINE_VERSION).replace(/\.parquet$/, ".csv");
-        const body =
-          "probe_id,beta\n" +
-          Object.entries(harmonized.betas)
-            .map(([probe, beta]) => `${probe},${beta}`)
-            .join("\n");
-        await putObject(key, body, "text/csv");
+        let key: string;
+        let probeCount: number;
+        if (workerResult) {
+          key = workerResult.feature_matrix_key;
+          probeCount = workerResult.probe_count;
+        } else {
+          // TS fallback: CSV-in-R2 keeps the pipeline shippable without Modal.
+          key = objectKeys.featureMatrix(orgId, sampleId, PIPELINE_VERSION).replace(/\.parquet$/, ".csv");
+          const body =
+            "probe_id,beta\n" +
+            Object.entries(harmonized.betas)
+              .map(([probe, beta]) => `${probe},${beta}`)
+              .join("\n");
+          await putObject(key, body, "text/csv");
+          probeCount = Object.keys(harmonized.betas).length;
+        }
         await withOrg(database, orgId, (tx) =>
           tx.insert(schema.featureMatrices).values({
             orgId,
             sampleId,
             objectKey: key,
-            probeCount: Object.keys(harmonized.betas).length,
+            probeCount,
             pipelineVersion: PIPELINE_VERSION,
           }),
         );
@@ -194,6 +249,9 @@ export const processDataFile = inngest.createFunction(
         const reference = imputationReference450k();
         const clocks = resolveClocksForOrg(context.orgType).filter(
           (clock) => clock.tissue === "multi-tissue" || context.tissue === "whole_blood",
+        );
+        const workerByClock = new Map(
+          (workerResult?.clocks ?? []).map((c) => [c.clock_id, c]),
         );
 
         await withOrg(database, orgId, async (tx) => {
@@ -213,7 +271,16 @@ export const processDataFile = inngest.createFunction(
           }
 
           for (const clock of clocks) {
-            const result = computeClock(clock, betas, { imputationReference: reference });
+            const fromWorker = workerByClock.get(clock.id);
+            const result =
+              fromWorker !== undefined
+                ? {
+                    value: fromWorker.value,
+                    probesUsed: fromWorker.probes_used,
+                    probesImputed: fromWorker.probes_imputed,
+                    refusedReason: fromWorker.refused_reason,
+                  }
+                : computeClock(clock, betas, { imputationReference: reference });
             await tx
               .insert(schema.clockResults)
               .values({
