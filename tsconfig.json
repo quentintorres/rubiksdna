@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/claims" },
+    { "path": "./packages/db" },
+    { "path": "./packages/clocks" },
+    { "path": "./packages/ingest" },
+    { "path": "./packages/axes" },
+    { "path": "./packages/report" }
+  ]
+}

@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #16181d;
+  --sub: #5a6472;
+  --line: #e3e7ee;
+  --paper: #ffffff;
+  --wash: #f6f8fb;
+  --accent: #2757d6;
+  --accent-soft: #e8eefc;
+  --warn: #8a6d1a;
+  --warn-wash: #fdf6e3;
+  --fail: #a33a2e;
+  --fail-wash: #fdeeec;
+  --ok: #1f7a4d;
+  --ok-wash: #e9f6ef;
+}
+
+html {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--ink);
+  color: #fff;
+  border: 1px solid var(--ink);
+  cursor: pointer;
+}
+.btn:hover {
+  background: #2c313b;
+}
+.btn-secondary {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn-secondary:hover {
+  background: var(--wash);
+}
+
+.input,
+select.input,
+textarea.input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  font-size: 13px;
+}
+.input:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sub);
+  margin-bottom: 4px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.pill-pass {
+  background: var(--ok-wash);
+  color: var(--ok);
+}
+.pill-warn {
+  background: var(--warn-wash);
+  color: var(--warn);
+}
+.pill-fail {
+  background: var(--fail-wash);
+  color: var(--fail);
+}
+.pill-muted {
+  background: var(--wash);
+  color: var(--sub);
+}
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+}
+table.data th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sub);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+table.data td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  vertical-align: top;
+}

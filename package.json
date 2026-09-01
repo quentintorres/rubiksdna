@@ -1,0 +1,25 @@
+{
+  "name": "rubiksdna",
+  "private": true,
+  "version": "0.1.0",
+  "description": "RUBIKS DNA — public site and State Map product monorepo",
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "pnpm --filter @rubiksdna/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "tsc --build --force",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint:claims": "node scripts/claims-lint.mjs",
+    "db:generate": "pnpm --filter @rubiksdna/db generate",
+    "verify": "pnpm typecheck && pnpm test && pnpm lint:claims"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
